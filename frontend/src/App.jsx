@@ -5,6 +5,7 @@ import PlacesTable from './components/PlacesTable';
 import SearchBar from './components/SearchBar';
 import ZoneForm from './components/ZoneForm';
 import ZonesTable from './components/ZonesTable';
+import Login from './components/Login';
 import './App.css';
 
 const API_URL = 'http://localhost:3000/api/places';
@@ -32,29 +33,74 @@ function App() {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [selectedZone, setSelectedZone] = useState(null);
   const [isDrawingZone, setIsDrawingZone] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
+  const [userEmail, setUserEmail] = useState(localStorage.getItem('userEmail') || '');
 
   useEffect(() => {
+    if (isAuthenticated) {
+      loadPlaces();
+      loadZones();
+    }
+  }, [isAuthenticated]);
+
+  function getAuthHeaders() {
+    const token = localStorage.getItem('token');
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    };
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userEmail');
+    setIsAuthenticated(false);
+    setUserEmail('');
+    setPlaces([]);
+    setZones([]);
+  }
+
+  function handleLoginSuccess(data) {
+    setIsAuthenticated(true);
+    setUserEmail(data.user.email);
+    localStorage.setItem('userEmail', data.user.email);
     loadPlaces();
     loadZones();
-  }, []);
+  }
 
   async function loadPlaces() {
     try {
-      const response = await fetch(API_URL);
+      const response = await fetch(API_URL, {
+        headers: getAuthHeaders()
+      });
+      if (response.status === 401 || response.status === 403) {
+        alert('Sesión expirada. Por favor inicia sesión nuevamente.');
+        handleLogout();
+        return;
+      }
       const data = await response.json();
       setPlaces(data);
     } catch (error) {
       console.error('Error cargando lugares:', error);
+      alert('Error al cargar lugares');
     }
   }
 
   async function loadZones() {
     try {
-      const response = await fetch(ZONES_API_URL);
+      const response = await fetch(ZONES_API_URL, {
+        headers: getAuthHeaders()
+      });
+      if (response.status === 401 || response.status === 403) {
+        alert('Sesión expirada. Por favor inicia sesión nuevamente.');
+        handleLogout();
+        return;
+      }
       const data = await response.json();
       setZones(data);
     } catch (error) {
       console.error('Error cargando zonas:', error);
+      alert('Error al cargar zonas');
     }
   }
 
@@ -104,9 +150,7 @@ function App() {
     try {
       const response = await fetch(url, {
         method: method,
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           name,
           description,
@@ -115,7 +159,17 @@ function App() {
         })
       });
 
-      await response.json();
+      if (response.status === 401 || response.status === 403) {
+        alert('Sesión expirada. Por favor inicia sesión nuevamente.');
+        handleLogout();
+        return;
+      }
+
+      const data = await response.json();
+      if (!response.ok) {
+        alert(data.message || 'Error al guardar el lugar');
+        return;
+      }
       alert(editMode ? 'Lugar actualizado' : 'Lugar registrado');
       resetForm();
       loadPlaces();
@@ -141,9 +195,7 @@ function App() {
     try {
       const response = await fetch(url, {
         method: method,
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           name,
           description,
@@ -151,7 +203,17 @@ function App() {
         })
       });
 
-      await response.json();
+      if (response.status === 401 || response.status === 403) {
+        alert('Sesión expirada. Por favor inicia sesión nuevamente.');
+        handleLogout();
+        return;
+      }
+
+      const data = await response.json();
+      if (!response.ok) {
+        alert(data.message || 'Error al guardar la zona');
+        return;
+      }
       alert(editZoneMode ? 'Zona actualizada' : 'Zona registrada');
       resetZoneForm();
       loadZones();
@@ -235,9 +297,21 @@ function App() {
 
     try {
       const response = await fetch(`${API_URL}/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getAuthHeaders()
       });
+
+      if (response.status === 401 || response.status === 403) {
+        alert('Sesión expirada. Por favor inicia sesión nuevamente.');
+        handleLogout();
+        return;
+      }
+
       const data = await response.json();
+      if (!response.ok) {
+        alert(data.message || 'Error al eliminar el lugar');
+        return;
+      }
       alert(data.message);
       loadPlaces();
     } catch (error) {
@@ -253,9 +327,21 @@ function App() {
 
     try {
       const response = await fetch(`${ZONES_API_URL}/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getAuthHeaders()
       });
+
+      if (response.status === 401 || response.status === 403) {
+        alert('Sesión expirada. Por favor inicia sesión nuevamente.');
+        handleLogout();
+        return;
+      }
+
       const data = await response.json();
+      if (!response.ok) {
+        alert(data.message || 'Error al eliminar la zona');
+        return;
+      }
       alert(data.message);
       loadZones();
     } catch (error) {
@@ -268,9 +354,23 @@ function App() {
     setSelectedZone(zone);
   }
 
+  if (!isAuthenticated) {
+    return (
+      <div className="App">
+        <Login onLogin={handleLoginSuccess} />
+      </div>
+    );
+  }
+
   return (
     <div className="App">
-      <h1>Registro de Ubicaciones con Leaflet</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h1>Registro de Ubicaciones con Leaflet</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <span>Usuario: <strong>{userEmail}</strong></span>
+          <button onClick={handleLogout}>Cerrar sesión</button>
+        </div>
+      </div>
       
       <SearchBar 
         searchTerm={searchTerm}

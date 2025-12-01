@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Place = require('../models/Place');
+const authenticateToken = require('../middleware/auth');
 
-router.get('/', async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
   try {
     const places = await Place.find();
     res.json(places);
@@ -11,7 +12,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
     const { name, description, latitude, longitude } = req.body;
     try {
         const place = new Place({
@@ -30,7 +31,7 @@ router.post('/', async (req, res) => {
 });
 
 //Endpoint para actualizar un lugar
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticateToken, async (req, res) => {
     const { name, description, latitude, longitude } = req.body;
     try {
         const place = await Place.findByIdAndUpdate(
@@ -52,7 +53,7 @@ router.put('/:id', async (req, res) => {
 });
 
 //Endpoint para eliminar un lugar
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticateToken, async (req, res) => {
     try {
         await Place.findByIdAndDelete(req.params.id);
         res.json({ message: 'Lugar eliminado correctamente' });

@@ -2,9 +2,10 @@
 const express = require('express');
 const router = express.Router();
 const Zone = require('../models/Zone');
+const authenticateToken = require('../middleware/auth');
 
 // Obtener todas las zonas
-router.get('/', async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
   try {
     const zones = await Zone.find();
     res.json(zones);
@@ -14,7 +15,7 @@ router.get('/', async (req, res) => {
 });
 
 // Crear una zona
-router.post('/', async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
   const { name, description, coordinates } = req.body;
 
   const zone = new Zone({
@@ -32,7 +33,7 @@ router.post('/', async (req, res) => {
 });
 
 // Actualizar zona
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const { name, description, coordinates } = req.body;
     const zone = await Zone.findById(req.params.id);
@@ -53,7 +54,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Borrar zona
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticateToken, async (req, res) => {
   try {
     const zone = await Zone.findById(req.params.id);
     
