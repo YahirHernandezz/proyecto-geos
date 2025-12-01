@@ -6,6 +6,7 @@ import SearchBar from './components/SearchBar';
 import ZoneForm from './components/ZoneForm';
 import ZonesTable from './components/ZonesTable';
 import Login from './components/Login';
+import Register from './components/Register';
 import './App.css';
 
 const API_URL = 'http://localhost:3000/api/places';
@@ -35,6 +36,7 @@ function App() {
   const [isDrawingZone, setIsDrawingZone] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
   const [userEmail, setUserEmail] = useState(localStorage.getItem('userEmail') || '');
+  const [showRegister, setShowRegister] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -354,10 +356,37 @@ function App() {
     setSelectedZone(zone);
   }
 
+  function handleRegisterSuccess(data) {
+    setShowRegister(false);
+    alert('Cuenta creada exitosamente. Por favor inicia sesión.');
+  }
+
+  function handleGoToRegister() {
+    setShowRegister(true);
+  }
+
+  function handleBackToLogin() {
+    setShowRegister(false);
+  }
+
   if (!isAuthenticated) {
+    if (showRegister) {
+      return (
+        <div className="App">
+          <Register 
+            onRegisterSuccess={handleRegisterSuccess}
+            onBackToLogin={handleBackToLogin}
+          />
+        </div>
+      );
+    }
+    
     return (
       <div className="App">
-        <Login onLogin={handleLoginSuccess} />
+        <Login 
+          onLogin={handleLoginSuccess}
+          onGoToRegister={handleGoToRegister}
+        />
       </div>
     );
   }

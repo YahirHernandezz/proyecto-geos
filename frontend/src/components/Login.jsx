@@ -8,7 +8,7 @@ const API_AUTH_URL = 'http://localhost:3000/api/auth';
  * Componente de Login para la Plataforma de Gestión Epidemiológica GeoSalud
  * Sistema de visualización y delimitación de zonas sanitarias
  */
-export default function App({ onLogin }) {
+export default function App({ onLogin, onGoToRegister }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -94,7 +94,7 @@ export default function App({ onLogin }) {
             {/* Campo de Email */}
             <div className="form-group">
               <label htmlFor="email" className="form-label">
-                Correo institucional
+                Correo
               </label>
               <div className="input-wrapper">
                 <input
@@ -156,6 +156,21 @@ export default function App({ onLogin }) {
                 'Iniciar Sesión'
               )}
             </button>
+
+            {/* Link para ir al registro */}
+            <div className="register-link">
+              <p className="register-text">
+                ¿No tienes una cuenta?{' '}
+                <button
+                  type="button"
+                  onClick={onGoToRegister}
+                  className="link-button"
+                  disabled={loading}
+                >
+                  Crear cuenta nueva
+                </button>
+              </p>
+            </div>
           </form>
         </div>
 
