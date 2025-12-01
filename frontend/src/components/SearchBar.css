@@ -1,0 +1,131 @@
+.search-container {
+  margin: 0 0 32px 0;
+  width: 100%;
+}
+
+.search-wrapper {
+  position: relative;
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon-wrapper {
+  position: absolute;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.search-icon {
+  width: 20px;
+  height: 20px;
+  color: #86868b;
+  transition: color 0.2s ease;
+}
+
+.search-input {
+  width: 100%;
+  padding: 14px 48px 14px 48px;
+  font-size: 1rem;
+  color: #1d1d1f;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  font-family: inherit;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.search-input::placeholder {
+  color: #86868b;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1),
+              0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.search-input:focus ~ .search-icon-wrapper .search-icon {
+  color: #0071e3;
+}
+
+.search-clear {
+  position: absolute;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.05);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.search-clear svg {
+  width: 14px;
+  height: 14px;
+  color: #6e6e73;
+}
+
+.search-clear:hover {
+  background: rgba(0, 0, 0, 0.1);
+  transform: scale(1.1);
+}
+
+.search-clear:hover svg {
+  color: #1d1d1f;
+}
+
+.search-clear:active {
+  transform: scale(0.95);
+}
+
+.search-results {
+  text-align: center;
+  margin-top: 12px;
+  animation: fadeInResult 0.3s ease-out;
+}
+
+@keyframes fadeInResult {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.results-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  background: linear-gradient(135deg, #0071e3 0%, #00a878 100%);
+  color: white;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+  letter-spacing: 0.02em;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .search-wrapper {
+    max-width: 100%;
+  }
+
+  .search-input {
+    font-size: 0.9375rem;
+  }
+}

@@ -23,10 +23,19 @@ app.use('/api/cases', cases);
 app.use('/api/resources', resources);
 
 // Conexión a MongoDB
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://alediaz709:alediaz709@cluster25712.yhv9vg7.mongodb.net/?retryWrites=true&w=majority&appName=cluster25712';
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+    console.error('ERROR: MONGODB_URI no está definida en el archivo .env');
+    process.exit(1);
+}
+
 mongoose.connect(MONGODB_URI)
-        .then(() => {console.log('Connected to MongoDB');})
-        .catch((error) => {console.error('Connection failed! ' + error);});
+        .then(() => {console.log('✓ Conectado a MongoDB exitosamente');})
+        .catch((error) => {
+            console.error('✗ Error al conectar a MongoDB:', error.message);
+            process.exit(1);
+        });
 
 app.listen(port, () => {
     console.log("My server is working on: " + `http://localhost:${port}`);

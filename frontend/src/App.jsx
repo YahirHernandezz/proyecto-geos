@@ -11,6 +11,7 @@ import ResourceForm from './components/ResourceForm';
 import ResourcesTable from './components/ResourcesTable';
 import Login from './components/Login';
 import Register from './components/Register';
+import Gallery from './components/Gallery';
 import './App.css';
 
 const API_URL = 'http://localhost:3000/api/places';
@@ -63,6 +64,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
   const [userEmail, setUserEmail] = useState(localStorage.getItem('userEmail') || '');
   const [showRegister, setShowRegister] = useState(false);
+  const [currentView, setCurrentView] = useState('map'); // 'map' or 'gallery'
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -733,109 +735,147 @@ function App() {
 
   return (
     <div className="App">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h1>Registro de Ubicaciones con Leaflet</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <span>Usuario: <strong>{userEmail}</strong></span>
-          <button onClick={handleLogout}>Cerrar sesión</button>
+      {/* Header de navegación moderno */}
+      <header className="app-header">
+        <div className="header-container">
+          <div className="header-left">
+            <div className="logo-circle">
+              <div className="logo-pulse"></div>
+            </div>
+            <div className="header-title">
+              <h1>GeoSalud</h1>
+              <p>Sistema de Gestión Sanitaria</p>
+            </div>
+          </div>
+
+          <nav className="header-nav">
+            <button 
+              className={`nav-button ${currentView === 'map' ? 'active' : ''}`}
+              onClick={() => setCurrentView('map')}
+            >
+              <span className="nav-icon">📍</span>
+              <span className="nav-text">Mapa Interactivo</span>
+            </button>
+            <button 
+              className={`nav-button ${currentView === 'gallery' ? 'active' : ''}`}
+              onClick={() => setCurrentView('gallery')}
+            >
+              <span className="nav-icon">🖼️</span>
+              <span className="nav-text">Centro Visual</span>
+            </button>
+          </nav>
+
+          <div className="header-right">
+            <div className="user-info">
+              <div className="user-avatar">{userEmail.charAt(0).toUpperCase()}</div>
+              <span className="user-email">{userEmail}</span>
+            </div>
+            <button className="logout-button" onClick={handleLogout}>
+              Cerrar Sesión
+            </button>
+          </div>
         </div>
-      </div>
-      
-      <SearchBar 
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        resultCount={filteredPlaces.length}
-      />
+      </header>
 
-      <MapComponent
-        places={filteredPlaces}
-        selectedLocation={selectedLocation}
-        onMapClick={handleMapClick}
-        editingPlace={editMode}
-        zones={zones}
-        onZoneComplete={handleZoneComplete}
-        selectedZone={selectedZone}
-        isDrawingZone={isDrawingZone}
-      />
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', marginTop: '20px' }}>
-        {/* Gestión de Lugares */}
-        <div style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
-          <h2>Gestión de Lugares</h2>
-          <PlaceForm
-            formData={formData}
-            onChange={handleInputChange}
-            onSubmit={handleSubmit}
-            onCancel={resetForm}
-            editMode={editMode}
+      {/* Renderizado condicional basado en la vista actual */}
+      {currentView === 'gallery' ? (
+        <Gallery />
+      ) : (
+        <div className="map-view-container">
+          <SearchBar 
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            resultCount={filteredPlaces.length}
           />
 
-          <PlacesTable
+          <MapComponent
             places={filteredPlaces}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        </div>
-
-        {/* Gestión de Zonas */}
-        <div style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
-          <h2>Gestión de Zonas</h2>
-          <ZoneForm
-            formData={zoneFormData}
-            onChange={handleZoneInputChange}
-            onSubmit={handleZoneSubmit}
-            onCancel={resetZoneForm}
-            editMode={editZoneMode}
-            onStartDrawing={handleStartDrawing}
-            isDrawing={isDrawingZone}
-          />
-
-          <ZonesTable
+            selectedLocation={selectedLocation}
+            onMapClick={handleMapClick}
+            editingPlace={editMode}
             zones={zones}
-            onEdit={handleEditZone}
-            onDelete={handleDeleteZone}
-            onSelect={handleSelectZone}
+            onZoneComplete={handleZoneComplete}
+            selectedZone={selectedZone}
+            isDrawingZone={isDrawingZone}
+            searchTerm={searchTerm}
           />
+
+          <div className="management-grid">
+            {/* Gestión de Lugares */}
+            <div className="management-card">
+              <h2 className="card-title">Gestión de Lugares</h2>
+              <PlaceForm
+                formData={formData}
+                onChange={handleInputChange}
+                onSubmit={handleSubmit}
+                onCancel={resetForm}
+                editMode={editMode}
+              />
+              <PlacesTable
+                places={filteredPlaces}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            </div>
+
+            {/* Gestión de Zonas */}
+            <div className="management-card">
+              <h2 className="card-title">Gestión de Zonas</h2>
+              <ZoneForm
+                formData={zoneFormData}
+                onChange={handleZoneInputChange}
+                onSubmit={handleZoneSubmit}
+                onCancel={resetZoneForm}
+                editMode={editZoneMode}
+                onStartDrawing={handleStartDrawing}
+                isDrawing={isDrawingZone}
+              />
+              <ZonesTable
+                zones={zones}
+                onEdit={handleEditZone}
+                onDelete={handleDeleteZone}
+                onSelect={handleSelectZone}
+              />
+            </div>
+
+            {/* Gestión de Casos Epidemiológicos */}
+            <div className="management-card">
+              <h2 className="card-title">Casos Epidemiológicos</h2>
+              <CaseForm
+                formData={caseFormData}
+                onChange={handleCaseInputChange}
+                onSubmit={handleCaseSubmit}
+                onCancel={resetCaseForm}
+                editMode={editCaseMode}
+                places={zones}
+              />
+              <CasesTable
+                cases={cases}
+                onEdit={handleEditCase}
+                onDelete={handleDeleteCase}
+              />
+            </div>
+
+            {/* Gestión de Recursos Sanitarios */}
+            <div className="management-card">
+              <h2 className="card-title">Recursos Sanitarios</h2>
+              <ResourceForm
+                formData={resourceFormData}
+                onChange={handleResourceInputChange}
+                onSubmit={handleResourceSubmit}
+                onCancel={resetResourceForm}
+                editMode={editResourceMode}
+                places={zones}
+              />
+              <ResourcesTable
+                resources={resources}
+                onEdit={handleEditResource}
+                onDelete={handleDeleteResource}
+              />
+            </div>
+          </div>
         </div>
-
-        {/* Gestión de Casos Epidemiológicos */}
-        <div style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
-          <h2>Casos Epidemiológicos</h2>
-          <CaseForm
-            formData={caseFormData}
-            onChange={handleCaseInputChange}
-            onSubmit={handleCaseSubmit}
-            onCancel={resetCaseForm}
-            editMode={editCaseMode}
-            places={zones}
-          />
-
-          <CasesTable
-            cases={cases}
-            onEdit={handleEditCase}
-            onDelete={handleDeleteCase}
-          />
-        </div>
-
-        {/* Gestión de Recursos Sanitarios */}
-        <div style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
-          <h2>Recursos Sanitarios</h2>
-          <ResourceForm
-            formData={resourceFormData}
-            onChange={handleResourceInputChange}
-            onSubmit={handleResourceSubmit}
-            onCancel={resetResourceForm}
-            editMode={editResourceMode}
-            places={zones}
-          />
-
-          <ResourcesTable
-            resources={resources}
-            onEdit={handleEditResource}
-            onDelete={handleDeleteResource}
-          />
-        </div>
-      </div>
+      )}
     </div>
   );
 }

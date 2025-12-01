@@ -9,7 +9,6 @@ function ZoneForm({
 }) {
   return (
     <div className="zone-form-container">
-      <h2>Gestión de Zonas</h2>
       <form onSubmit={onSubmit}>
         <input
           type="text"
